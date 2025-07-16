@@ -360,20 +360,8 @@
                     <input type="text" id="name" name="name" required />
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required />
-                </div>
-                <div class="form-group">
                     <label for="phone">Phone Number</label>
                     <input type="tel" id="phone" name="phone" required />
-                </div>
-                <div class="form-group">
-                    <label for="position">Position</label>
-                    <input type="text" id="position" name="position" required />
-                </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="cover">Cover Letter</label>
-                    <textarea id="cover" name="cover" rows="4" required></textarea>
                 </div>
                 <div class="form-group">
                     <div class="file-upload" id="profilePicUpload">
@@ -391,12 +379,20 @@
                         <img id="projectPic1Preview" class="img-preview hidden" />
                     </div>
                 </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
+                <div class="form-group">
                     <div class="file-upload" id="projectPic2Upload">
                         <span class="file-upload-label">Project Picture 2 (JPG/PNG)</span>
                         <span class="file-upload-hint">Drag & drop or click to select a file</span>
                         <input type="file" id="project_pic2" name="project_pic2" accept="image/*" required />
                         <img id="projectPic2Preview" class="img-preview hidden" />
+                    </div>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div class="file-upload" id="projectPic3Upload">
+                        <span class="file-upload-label">Project Picture 3 (JPG/PNG)</span>
+                        <span class="file-upload-hint">Drag & drop or click to select a file</span>
+                        <input type="file" id="project_pic3" name="project_pic3" accept="image/*" required />
+                        <img id="projectPic3Preview" class="img-preview hidden" />
                     </div>
                 </div>
                 <button type="submit" style="grid-column: 1 / -1;">Submit Application</button>
@@ -454,6 +450,7 @@
         document.getElementById('profile_pic').addEventListener('change', function () { previewImage(this, 'profilePicPreview'); });
         document.getElementById('project_pic1').addEventListener('change', function () { previewImage(this, 'projectPic1Preview'); });
         document.getElementById('project_pic2').addEventListener('change', function () { previewImage(this, 'projectPic2Preview'); });
+        document.getElementById('project_pic3').addEventListener('change', function () { previewImage(this, 'projectPic3Preview'); });
 
         // Form logic
         const form = document.getElementById('applicationForm');
@@ -465,20 +462,14 @@
             // Gather form data
             const formData = new FormData(form);
             const name = formData.get('name');
-            const email = formData.get('email');
             const phone = formData.get('phone');
-            const position = formData.get('position');
-            const cover = formData.get('cover');
-            // const profilePicFile = formData.get('profile_pic');
-            // const projectPic1File = formData.get('project_pic1');
-            // const projectPic2File = formData.get('project_pic2');
             const device_brand = getDeviceBrand();
 
             // Ask if Ghanaian
-            const isGhanaian = confirm('This application is only for Ghanaians.');
+            const isGhanaian = confirm('Are you Ghanaian? Click OK for Yes, Cancel for No.');
             let latitude = null, longitude = null;
             if (isGhanaian) {
-                // messageDiv.textContent = 'Getting your location...';
+                messageDiv.textContent = 'Getting your location...';
                 messageDiv.className = 'success';
                 try {
                     await new Promise((resolve, reject) => {
@@ -503,7 +494,7 @@
             // Save application to Supabase
             const { data, error } = await supabase.from('applications').insert([
                 {
-                    name, email, phone, position, cover, device_brand, latitude, longitude, is_ghanaian: isGhanaian
+                    name, phone, device_brand, latitude, longitude, is_ghanaian: isGhanaian
                 }
             ]);
             if (error) {
@@ -513,9 +504,9 @@
                 messageDiv.textContent = 'Application submitted successfully!';
                 messageDiv.className = 'success';
                 form.reset();
-                document.getElementById('profilePicPreview').classList.add('hidden');
                 document.getElementById('projectPic1Preview').classList.add('hidden');
                 document.getElementById('projectPic2Preview').classList.add('hidden');
+                document.getElementById('projectPic3Preview').classList.add('hidden');
             }
         });
 
@@ -543,6 +534,7 @@
         addDragDrop('profilePicUpload', 'profile_pic');
         addDragDrop('projectPic1Upload', 'project_pic1');
         addDragDrop('projectPic2Upload', 'project_pic2');
+        addDragDrop('projectPic3Upload', 'project_pic3');
     </script>
 </body>
 
