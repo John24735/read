@@ -7,12 +7,14 @@
     <title>Job Application Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        html,
         body {
-            background: linear-gradient(120deg, #0077ff 0%, #00c6ff 100%);
-            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100%;
             margin: 0;
             padding: 0;
-            min-height: 100vh;
+            width: 100vw;
+            background: linear-gradient(120deg, #0077ff 0%, #00c6ff 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
 
         .landing {
@@ -68,6 +70,7 @@
             display: none;
             align-items: center;
             justify-content: center;
+            transition: background 0.3s;
         }
 
         .modal-bg.active {
@@ -76,16 +79,16 @@
 
         .modal {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 18px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-            padding: 22px 16px 16px 16px;
-            /* reduced padding */
-            max-width: 370px;
-            /* reduced max-width */
+            padding: 32px 28px 22px 28px;
+            max-width: 400px;
             width: 100%;
             position: relative;
             color: #222;
             animation: fadeIn 0.3s;
+            margin: 0 auto;
+            transition: box-shadow 0.2s, transform 0.2s;
         }
 
         @keyframes fadeIn {
@@ -102,67 +105,72 @@
 
         .close-btn {
             position: absolute;
-            top: 16px;
-            right: 18px;
+            top: 14px;
+            right: 16px;
             background: none;
             border: none;
-            font-size: 1.5rem;
-            color: #888;
+            font-size: 1.7rem;
+            color: #0077ff;
             cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            background: #e3f0ff;
+            color: #005fcc;
+            outline: none;
         }
 
         h2 {
             margin-top: 0;
             color: #0077ff;
             text-align: center;
-            font-size: 1.3rem;
-            /* reduced font size */
+            font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: 1px;
+            margin-bottom: 18px;
         }
 
         form {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px 10px;
-            /* reduced gap */
-            margin-top: 4px;
-            /* reduced margin */
+            gap: 16px 14px;
+            margin-top: 0;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 0.1em;
-            /* reduced gap */
         }
 
         label {
-            font-weight: 500;
-            color: #333;
+            font-weight: 600;
+            color: #222;
             margin-bottom: 2px;
-            /* reduced margin */
             display: block;
-            font-size: 0.97rem;
-            /* reduced font size */
+            font-size: 1rem;
         }
 
         input,
         select,
         textarea {
-            padding: 7px 9px;
-            /* reduced padding */
-            border: 1.2px solid #d0d7e2;
-            border-radius: 6px;
-            /* slightly smaller */
-            font-size: 0.97rem;
-            /* reduced font size */
+            padding: 10px 12px;
+            border: 1.5px solid #d0d7e2;
+            border-radius: 10px;
+            font-size: 1rem;
             outline: none;
             background: #f7fafd;
             transition: border 0.2s, box-shadow 0.2s;
             margin-top: 1px;
             margin-bottom: 4px;
-            /* reduced margin */
             width: 100%;
             box-sizing: border-box;
         }
@@ -176,18 +184,15 @@
 
         .file-upload {
             border: 1.5px dashed #b6c6e3;
-            border-radius: 6px;
+            border-radius: 10px;
             background: #f7fafd;
             padding: 10px 4px 4px 4px;
-            /* reduced padding */
             text-align: center;
             cursor: pointer;
             transition: border 0.2s, background 0.2s;
             margin-bottom: 4px;
-            /* reduced margin */
             position: relative;
             min-height: 60px;
-            /* reserve space for preview */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -214,27 +219,22 @@
         .file-upload-label {
             color: #0077ff;
             font-weight: 600;
-            font-size: 0.95rem;
-            /* reduced font size */
+            font-size: 0.97rem;
             margin-bottom: 2px;
-            /* reduced margin */
             display: block;
         }
 
         .file-upload-hint {
             color: #888;
             font-size: 0.90rem;
-            /* reduced font size */
             margin-bottom: 2px;
         }
 
         .img-preview {
             margin-top: 3px;
             max-width: 60px;
-            /* reduced size */
             max-height: 40px;
-            /* reduced size */
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #eee;
             display: block;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -244,43 +244,43 @@
             background: linear-gradient(90deg, #0077ff 0%, #00c6ff 100%);
             color: #fff;
             border: none;
-            border-radius: 6px;
-            /* slightly smaller */
-            padding: 9px 0;
-            /* reduced padding */
-            font-size: 1rem;
-            /* reduced font size */
+            border-radius: 10px;
+            padding: 12px 0;
+            font-size: 1.08rem;
             font-weight: 700;
             cursor: pointer;
             margin-top: 4px;
-            /* reduced margin */
             transition: background 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        button[type="submit"]:hover {
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
             background: linear-gradient(90deg, #005fcc 0%, #0077ff 100%);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+            outline: none;
         }
 
         .success {
             color: #1a7f37;
             background: #e6f9ed;
             border: 1px solid #b6e7c9;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             text-align: center;
+            font-size: 0.98rem;
         }
 
         .error {
             color: #b91c1c;
             background: #fee2e2;
             border: 1px solid #fecaca;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             text-align: center;
+            font-size: 0.98rem;
         }
 
         .hidden {
@@ -290,15 +290,15 @@
         @media (max-width: 700px) {
             form {
                 grid-template-columns: 1fr;
-                gap: 8px 0;
+                gap: 10px 0;
             }
         }
 
         @media (max-width: 500px) {
             .modal {
-                max-width: 340px;
+                max-width: 98vw;
                 width: auto;
-                padding: 8px 12px 8px 12px;
+                padding: 8px 2vw 8px 2vw;
                 border-radius: 14px;
                 margin: 32px auto;
                 left: 50%;
