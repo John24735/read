@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Location Map</title>
+    <title>Admin - Applications Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,13 +15,12 @@
             margin: 0;
             padding: 0;
             width: 100vw;
-            height: 100vh;
             background: #181818;
         }
 
         #map {
             width: 100vw;
-            height: 100vh;
+            height: 60vh;
             z-index: 1;
         }
 
@@ -42,87 +41,129 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        #locationSelect {
-            position: absolute;
-            top: 60px;
-            left: 20px;
-            z-index: 1100;
-            padding: 8px 12px;
-            font-size: 1rem;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+        #applicationTable {
+            width: 98vw;
+            margin: 24px auto 0 auto;
+            border-collapse: collapse;
             background: #fff;
-            min-width: 220px;
+            border-radius: 8px;
+            overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #applicationTable th,
+        #applicationTable td {
+            padding: 10px 8px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+            font-size: 0.98rem;
+        }
+
+        #applicationTable th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        #applicationTable tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .cv-link {
+            color: #0077ff;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .no-location {
+            color: #b91c1c;
+            font-size: 0.95em;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">Admin: Locations Map</div>
-    <select id="locationSelect">
-        <option value="">Select a location...</option>
-    </select>
+    <div class="header">Admin: Applications Map</div>
     <div id="map"></div>
+    <table id="applicationTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Position</th>
+                <th>Device</th>
+                <th>Ghanaian?</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody id="appTableBody"></tbody>
+    </table>
     <script>
-        // Replace with your actual Supabase project URL and anon key
         const SUPABASE_URL = 'https://nqnbuiflrlyosqtxnmwm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xbmJ1aWZscmx5b3NxdHhubXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2Mjg2NzUsImV4cCI6MjA2ODIwNDY3NX0.3B1fjKBgL1jtwtzC2C8brGvyuaGGt8pxRtm_G89xdVE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Initialize map
-        const map = L.map('map').setView([0, 0], 2);
+        const map = L.map('map').setView([7.9, -1.0], 6); // Centered on Ghana
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        const locationSelect = document.getElementById('locationSelect');
         let markers = [];
-        let markerData = [];
 
-        // Fetch locations from Supabase and add markers
-        async function loadLocations() {
+        async function loadApplications() {
             const { data, error } = await supabase
-                .from('locations')
-                .select('id,latitude,longitude,created_at,device_brand');
+                .from('applications')
+                .select('*')
+                .order('created_at', { ascending: false });
             if (error) {
-                alert('Failed to load locations from database.');
+                alert('Failed to load applications from database.');
                 return;
             }
-            if (data && data.length > 0) {
-                markerData = data;
-                data.forEach((loc, idx) => {
-                    if (loc.latitude && loc.longitude) {
-                        const marker = L.marker([loc.latitude, loc.longitude])
-                            .addTo(map)
-                            .bindPopup(`Lat: ${loc.latitude}<br>Lon: ${loc.longitude}<br>${loc.device_brand ? 'Device: ' + loc.device_brand + '<br>' : ''}${loc.created_at ? 'Time: ' + loc.created_at : ''}`);
-                        markers.push(marker);
-                        // Add to dropdown
-                        const option = document.createElement('option');
-                        option.value = idx;
-                        option.textContent = `#${loc.id} - ${loc.device_brand ? loc.device_brand : 'Unknown'} - ${loc.created_at ? loc.created_at : ''}`;
-                        locationSelect.appendChild(option);
-                    }
-                });
-                // Fit map to markers
-                const bounds = L.latLngBounds(data.filter(l => l.latitude && l.longitude).map(l => [l.latitude, l.longitude]));
-                if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+            const tableBody = document.getElementById('appTableBody');
+            tableBody.innerHTML = '';
+            let bounds = [];
+            data.forEach(app => {
+                // Table row
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${app.name || ''}</td>
+          <td>${app.email || ''}</td>
+          <td>${app.phone || ''}</td>
+          <td>${app.position || ''}</td>
+          <td>${app.device_brand || ''}</td>
+          <td>${app.is_ghanaian ? 'Yes' : 'No'}</td>
+          <td>${app.latitude !== null ? app.latitude : '<span class="no-location">N/A</span>'}</td>
+          <td>${app.longitude !== null ? app.longitude : '<span class="no-location">N/A</span>'}</td>
+          <td>${app.created_at ? new Date(app.created_at).toLocaleString() : ''}</td>
+        `;
+                tableBody.appendChild(tr);
+                // Map marker
+                if (app.latitude !== null && app.longitude !== null) {
+                    const marker = L.marker([app.latitude, app.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+              <b>${app.name || ''}</b><br>
+              <b>Position:</b> ${app.position || ''}<br>
+              <b>Email:</b> ${app.email || ''}<br>
+              <b>Phone:</b> ${app.phone || ''}<br>
+              <b>Device:</b> ${app.device_brand || ''}<br>
+              <b>Ghanaian?:</b> ${app.is_ghanaian ? 'Yes' : 'No'}<br>
+              <b>Submitted:</b> ${app.created_at ? new Date(app.created_at).toLocaleString() : ''}
+            `);
+                    markers.push(marker);
+                    bounds.push([app.latitude, app.longitude]);
+                }
+            });
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [40, 40] });
             }
         }
 
-        locationSelect.addEventListener('change', function () {
-            const idx = this.value;
-            if (idx !== "" && markerData[idx]) {
-                const loc = markerData[idx];
-                map.setView([loc.latitude, loc.longitude], 14);
-                if (markers[idx]) {
-                    markers[idx].openPopup();
-                }
-            }
-        });
-
-        loadLocations();
+        loadApplications();
     </script>
 </body>
 

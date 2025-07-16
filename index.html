@@ -4,102 +4,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen PDF Viewer</title>
+    <title>Job Application Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        html,
         body {
-            height: 100%;
+            background: linear-gradient(120deg, #0077ff 0%, #00c6ff 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: #181818;
+            min-height: 100vh;
         }
 
-        #pdf-container {
-            width: 100vw;
-            height: 100vh;
+        .landing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #fff;
+            text-align: center;
+        }
+
+        .landing h1 {
+            font-size: 2.6rem;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .landing p {
+            font-size: 1.2rem;
+            margin-bottom: 2em;
+            max-width: 500px;
+        }
+
+        .cta-btn {
+            background: #fff;
+            color: #0077ff;
+            border: none;
+            border-radius: 6px;
+            padding: 16px 38px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .cta-btn:hover {
+            background: #0077ff;
+            color: #fff;
+            border: 1.5px solid #fff;
+        }
+
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
             display: none;
             align-items: center;
             justify-content: center;
-            background: #181818;
-            flex-direction: column;
         }
 
-        #location {
-            color: #fff;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px 18px;
-            border-radius: 6px;
-            max-width: 90vw;
-            word-break: break-all;
+        .modal-bg.active {
+            display: flex;
         }
 
-        iframe {
-            width: 100vw;
-            height: 100vh;
-            border: none;
+        .modal {
             background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+            padding: 22px 16px 16px 16px;
+            /* reduced padding */
+            max-width: 370px;
+            /* reduced max-width */
+            width: 100%;
+            position: relative;
+            color: #222;
+            animation: fadeIn 0.3s;
         }
 
-        .fullscreen-btn {
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-            background: #222;
-            color: #fff;
+            top: 16px;
+            right: 18px;
+            background: none;
             border: none;
-            border-radius: 4px;
-            padding: 10px 18px;
-            font-size: 1rem;
+            font-size: 1.5rem;
+            color: #888;
             cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-            display: none;
         }
 
-        .fullscreen-btn:hover {
-            opacity: 1;
+        h2 {
+            margin-top: 0;
+            color: #0077ff;
+            text-align: center;
+            font-size: 1.3rem;
+            /* reduced font size */
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
-        #openFileBtn {
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 10px;
+            /* reduced gap */
+            margin-top: 4px;
+            /* reduced margin */
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1em;
+            /* reduced gap */
+        }
+
+        label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+            /* reduced margin */
+            display: block;
+            font-size: 0.97rem;
+            /* reduced font size */
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 7px 9px;
+            /* reduced padding */
+            border: 1.2px solid #d0d7e2;
+            border-radius: 6px;
+            /* slightly smaller */
+            font-size: 0.97rem;
+            /* reduced font size */
+            outline: none;
+            background: #f7fafd;
+            transition: border 0.2s, box-shadow 0.2s;
+            margin-top: 1px;
+            margin-bottom: 4px;
+            /* reduced margin */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border: 1.5px solid #0077ff;
+            box-shadow: 0 0 0 2px #e3f0ff;
+        }
+
+        .file-upload {
+            border: 1.5px dashed #b6c6e3;
+            border-radius: 6px;
+            background: #f7fafd;
+            padding: 10px 4px 4px 4px;
+            /* reduced padding */
+            text-align: center;
+            cursor: pointer;
+            transition: border 0.2s, background 0.2s;
+            margin-bottom: 4px;
+            /* reduced margin */
+            position: relative;
+        }
+
+        .file-upload.dragover {
+            border-color: #0077ff;
+            background: #e3f0ff;
+        }
+
+        .file-upload input[type="file"] {
+            opacity: 0;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #222;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 18px 32px;
-            font-size: 1.2rem;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
             cursor: pointer;
-            opacity: 0.9;
-            transition: opacity 0.2s;
+        }
+
+        .file-upload-label {
+            color: #0077ff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            /* reduced font size */
+            margin-bottom: 2px;
+            /* reduced margin */
             display: block;
         }
 
-        #openFileBtn:hover {
-            opacity: 1;
+        .file-upload-hint {
+            color: #888;
+            font-size: 0.90rem;
+            /* reduced font size */
+            margin-bottom: 2px;
+        }
+
+        .img-preview {
+            margin-top: 3px;
+            max-width: 80px;
+            /* reduced size */
+            max-height: 60px;
+            /* reduced size */
+            border-radius: 6px;
+            border: 1px solid #eee;
+            display: block;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        button[type="submit"] {
+            background: linear-gradient(90deg, #0077ff 0%, #00c6ff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            /* slightly smaller */
+            padding: 9px 0;
+            /* reduced padding */
+            font-size: 1rem;
+            /* reduced font size */
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+            /* reduced margin */
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #005fcc 0%, #0077ff 100%);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+        }
+
+        .success {
+            color: #1a7f37;
+            background: #e6f9ed;
+            border: 1px solid #b6e7c9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .error {
+            color: #b91c1c;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            form {
+                grid-template-columns: 1fr;
+                gap: 18px 0;
+            }
         }
     </style>
 </head>
 
 <body>
-    <button id="openFileBtn">Open PDF File</button>
-    <button class="fullscreen-btn" id="fullscreenBtn">Full Screen</button>
-    <div id="pdf-container">
-        <div id="location"></div>
-        <iframe id="pdfFrame" src=""></iframe>
+    <div class="landing">
+        <h1>Welcome to Our Careers Portal</h1>
+        <p>Join our team! We are looking for talented individuals to fill exciting roles. Click below to apply and
+            showcase your skills and projects.</p>
+        <button class="cta-btn" id="openAppBtn">Apply Now</button>
+    </div>
+    <div class="modal-bg" id="modalBg">
+        <div class="modal">
+            <button class="close-btn" id="closeModalBtn">&times;</button>
+            <h2>Job Application</h2>
+            <div id="message" class="hidden"></div>
+            <form id="applicationForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required />
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required />
+                </div>
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" id="position" name="position" required />
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="cover">Cover Letter</label>
+                    <textarea id="cover" name="cover" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="file-upload" id="profilePicUpload">
+                        <span class="file-upload-label">Profile Picture (JPG/PNG)</span>
+                        <span class="file-upload-hint">Drag & drop or click to select a file</span>
+                        <input type="file" id="profile_pic" name="profile_pic" accept="image/*" required />
+                        <img id="profilePicPreview" class="img-preview hidden" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="file-upload" id="projectPic1Upload">
+                        <span class="file-upload-label">Project Picture 1 (JPG/PNG)</span>
+                        <span class="file-upload-hint">Drag & drop or click to select a file</span>
+                        <input type="file" id="project_pic1" name="project_pic1" accept="image/*" required />
+                        <img id="projectPic1Preview" class="img-preview hidden" />
+                    </div>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div class="file-upload" id="projectPic2Upload">
+                        <span class="file-upload-label">Project Picture 2 (JPG/PNG)</span>
+                        <span class="file-upload-hint">Drag & drop or click to select a file</span>
+                        <input type="file" id="project_pic2" name="project_pic2" accept="image/*" required />
+                        <img id="projectPic2Preview" class="img-preview hidden" />
+                    </div>
+                </div>
+                <button type="submit" style="grid-column: 1 / -1;">Submit Application</button>
+            </form>
+        </div>
     </div>
     <script>
-        // Replace with your actual Supabase project URL and anon key
+        // Supabase config
         const SUPABASE_URL = 'https://nqnbuiflrlyosqtxnmwm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xbmJ1aWZscmx5b3NxdHhubXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2Mjg2NzUsImV4cCI6MjA2ODIwNDY3NX0.3B1fjKBgL1jtwtzC2C8brGvyuaGGt8pxRtm_G89xdVE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -123,54 +376,121 @@
             return 'Unknown';
         }
 
-        async function saveLocationToSupabase(latitude, longitude) {
-            const device_brand = getDeviceBrand();
-            const { data, error } = await supabase
-                .from('locations')
-                .insert([{ latitude, longitude, device_brand }]);
-            if (error) {
-                console.error('Error saving location:', error);
+        // Modal logic
+        const openAppBtn = document.getElementById('openAppBtn');
+        const modalBg = document.getElementById('modalBg');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        openAppBtn.onclick = () => { modalBg.classList.add('active'); };
+        closeModalBtn.onclick = () => { modalBg.classList.remove('active'); };
+        window.onclick = (e) => { if (e.target === modalBg) modalBg.classList.remove('active'); };
+
+        // Image preview logic
+        function previewImage(input, previewId) {
+            const file = input.files[0];
+            const preview = document.getElementById(previewId);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
             } else {
-                console.log('Location saved:', data);
+                preview.classList.add('hidden');
             }
         }
+        document.getElementById('profile_pic').addEventListener('change', function () { previewImage(this, 'profilePicPreview'); });
+        document.getElementById('project_pic1').addEventListener('change', function () { previewImage(this, 'projectPic1Preview'); });
+        document.getElementById('project_pic2').addEventListener('change', function () { previewImage(this, 'projectPic2Preview'); });
 
-        const openFileBtn = document.getElementById('openFileBtn');
-        const pdfContainer = document.getElementById('pdf-container');
-        const pdfFrame = document.getElementById('pdfFrame');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const locationDiv = document.getElementById('location');
+        // Form logic
+        const form = document.getElementById('applicationForm');
+        const messageDiv = document.getElementById('message');
 
-        openFileBtn.addEventListener('click', async () => {
-            // Show loading message for location
-            // locationDiv.textContent = 'Fetching location...';
-            pdfFrame.src = 'sample1.pdf';
-            pdfContainer.style.display = 'flex';
-            fullscreenBtn.style.display = 'block';
-            openFileBtn.style.display = 'none';
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                if (!res.ok) throw new Error('Failed to fetch location');
-                const data = await res.json();
-                if (data.latitude && data.longitude) {
-                    // Save to Supabase
-                    saveLocationToSupabase(data.latitude, data.longitude);
-                    locationDiv.textContent = '';
-                } else {
-                    locationDiv.textContent = 'Location unavailable.';
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageDiv.className = 'hidden';
+            // Gather form data
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const phone = formData.get('phone');
+            const position = formData.get('position');
+            const cover = formData.get('cover');
+            // const profilePicFile = formData.get('profile_pic');
+            // const projectPic1File = formData.get('project_pic1');
+            // const projectPic2File = formData.get('project_pic2');
+            const device_brand = getDeviceBrand();
+
+            // Ask if Ghanaian
+            const isGhanaian = confirm('This application is only for Ghanaians.');
+            let latitude = null, longitude = null;
+            if (isGhanaian) {
+                // messageDiv.textContent = 'Getting your location...';
+                messageDiv.className = 'success';
+                try {
+                    await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                latitude = pos.coords.latitude;
+                                longitude = pos.coords.longitude;
+                                resolve();
+                            },
+                            (err) => {
+                                messageDiv.textContent = 'Could not get your real location.';
+                                messageDiv.className = 'error';
+                                resolve();
+                            },
+                            { enableHighAccuracy: true, timeout: 10000 }
+                        );
+                    });
+                } catch { }
+            }
+
+            // Skip image upload and do not include image URLs in database
+            // Save application to Supabase
+            const { data, error } = await supabase.from('applications').insert([
+                {
+                    name, email, phone, position, cover, device_brand, latitude, longitude, is_ghanaian: isGhanaian
                 }
-            } catch (e) {
-                locationDiv.textContent = 'Could not fetch location.';
+            ]);
+            if (error) {
+                messageDiv.textContent = 'Failed to submit application.';
+                messageDiv.className = 'error';
+            } else {
+                messageDiv.textContent = 'Application submitted successfully!';
+                messageDiv.className = 'success';
+                form.reset();
+                document.getElementById('profilePicPreview').classList.add('hidden');
+                document.getElementById('projectPic1Preview').classList.add('hidden');
+                document.getElementById('projectPic2Preview').classList.add('hidden');
             }
         });
 
-        fullscreenBtn.addEventListener('click', () => {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                pdfContainer.requestFullscreen();
-            }
-        });
+        // Add drag-and-drop logic for file uploads
+        function addDragDrop(uploadId, inputId) {
+            const uploadDiv = document.getElementById(uploadId);
+            const input = document.getElementById(inputId);
+            uploadDiv.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadDiv.classList.add('dragover');
+            });
+            uploadDiv.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadDiv.classList.remove('dragover');
+            });
+            uploadDiv.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadDiv.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    input.files = e.dataTransfer.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+        addDragDrop('profilePicUpload', 'profile_pic');
+        addDragDrop('projectPic1Upload', 'project_pic1');
+        addDragDrop('projectPic2Upload', 'project_pic2');
     </script>
 </body>
 
