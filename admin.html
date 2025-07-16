@@ -88,9 +88,7 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Email</th>
                 <th>Phone</th>
-                <th>Position</th>
                 <th>Device</th>
                 <th>Ghanaian?</th>
                 <th>Latitude</th>
@@ -131,9 +129,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
           <td>${app.name || ''}</td>
-          <td>${app.email || ''}</td>
           <td>${app.phone || ''}</td>
-          <td>${app.position || ''}</td>
           <td>${app.device_brand || ''}</td>
           <td>${app.is_ghanaian ? 'Yes' : 'No'}</td>
           <td>${app.latitude !== null ? app.latitude : '<span class="no-location">N/A</span>'}</td>
@@ -147,8 +143,6 @@
                         .addTo(map)
                         .bindPopup(`
               <b>${app.name || ''}</b><br>
-              <b>Position:</b> ${app.position || ''}<br>
-              <b>Email:</b> ${app.email || ''}<br>
               <b>Phone:</b> ${app.phone || ''}<br>
               <b>Device:</b> ${app.device_brand || ''}<br>
               <b>Ghanaian?:</b> ${app.is_ghanaian ? 'Yes' : 'No'}<br>

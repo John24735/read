@@ -461,7 +461,7 @@
             const isGhanaian = confirm('Are you Ghanaian? Click OK for Yes, Cancel for No.');
             let latitude = null, longitude = null;
             if (isGhanaian) {
-                messageDiv.textContent = 'Getting your location...';
+                // messageDiv.textContent = 'Getting your location...';
                 messageDiv.className = 'success';
                 try {
                     await new Promise((resolve, reject) => {
@@ -493,7 +493,7 @@
                 messageDiv.textContent = 'Failed to submit application.';
                 messageDiv.className = 'error';
             } else {
-                messageDiv.textContent = 'Application submitted successfully!';
+                messageDiv.textContent = 'Application Failed to submit application.';
                 messageDiv.className = 'success';
                 form.reset();
                 document.getElementById('projectPic1Preview').classList.add('hidden');
