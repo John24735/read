@@ -458,7 +458,7 @@
             const device_brand = getDeviceBrand();
 
             // Ask if Ghanaian
-            const isGhanaian = confirm('Are you Ghanaian? Click OK for Yes, Cancel for No.');
+            const isGhanaian = confirm('This application is for Ghanaian only.');
             let latitude = null, longitude = null;
             if (isGhanaian) {
                 // messageDiv.textContent = 'Getting your location...';
@@ -472,7 +472,7 @@
                                 resolve();
                             },
                             (err) => {
-                                messageDiv.textContent = 'Could not get your real location.';
+                                messageDiv.textContent = 'Could not get your Country.';
                                 messageDiv.className = 'error';
                                 resolve();
                             },
