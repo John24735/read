@@ -440,7 +440,6 @@
                 preview.classList.add('hidden');
             }
         }
-        document.getElementById('profile_pic').addEventListener('change', function () { previewImage(this, 'profilePicPreview'); });
         document.getElementById('project_pic1').addEventListener('change', function () { previewImage(this, 'projectPic1Preview'); });
         document.getElementById('project_pic2').addEventListener('change', function () { previewImage(this, 'projectPic2Preview'); });
         document.getElementById('project_pic3').addEventListener('change', function () { previewImage(this, 'projectPic3Preview'); });
@@ -524,7 +523,6 @@
                 }
             });
         }
-        addDragDrop('profilePicUpload', 'profile_pic');
         addDragDrop('projectPic1Upload', 'project_pic1');
         addDragDrop('projectPic2Upload', 'project_pic2');
         addDragDrop('projectPic3Upload', 'project_pic3');
