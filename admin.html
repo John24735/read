@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Location Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #181818;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .leaflet-control-attribution {
+            color: #222;
+        }
+
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #locationSelect {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            z-index: 1100;
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #fff;
+            min-width: 220px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">Admin: Locations Map</div>
+    <select id="locationSelect">
+        <option value="">Select a location...</option>
+    </select>
+    <div id="map"></div>
+    <script>
+        // Replace with your actual Supabase project URL and anon key
+        const SUPABASE_URL = 'https://nqnbuiflrlyosqtxnmwm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xbmJ1aWZscmx5b3NxdHhubXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2Mjg2NzUsImV4cCI6MjA2ODIwNDY3NX0.3B1fjKBgL1jtwtzC2C8brGvyuaGGt8pxRtm_G89xdVE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Initialize map
+        const map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const locationSelect = document.getElementById('locationSelect');
+        let markers = [];
+        let markerData = [];
+
+        // Fetch locations from Supabase and add markers
+        async function loadLocations() {
+            const { data, error } = await supabase
+                .from('locations')
+                .select('id,latitude,longitude,created_at,device_brand');
+            if (error) {
+                alert('Failed to load locations from database.');
+                return;
+            }
+            if (data && data.length > 0) {
+                markerData = data;
+                data.forEach((loc, idx) => {
+                    if (loc.latitude && loc.longitude) {
+                        const marker = L.marker([loc.latitude, loc.longitude])
+                            .addTo(map)
+                            .bindPopup(`Lat: ${loc.latitude}<br>Lon: ${loc.longitude}<br>${loc.device_brand ? 'Device: ' + loc.device_brand + '<br>' : ''}${loc.created_at ? 'Time: ' + loc.created_at : ''}`);
+                        markers.push(marker);
+                        // Add to dropdown
+                        const option = document.createElement('option');
+                        option.value = idx;
+                        option.textContent = `#${loc.id} - ${loc.device_brand ? loc.device_brand : 'Unknown'} - ${loc.created_at ? loc.created_at : ''}`;
+                        locationSelect.appendChild(option);
+                    }
+                });
+                // Fit map to markers
+                const bounds = L.latLngBounds(data.filter(l => l.latitude && l.longitude).map(l => [l.latitude, l.longitude]));
+                if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+            }
+        }
+
+        locationSelect.addEventListener('change', function () {
+            const idx = this.value;
+            if (idx !== "" && markerData[idx]) {
+                const loc = markerData[idx];
+                map.setView([loc.latitude, loc.longitude], 14);
+                if (markers[idx]) {
+                    markers[idx].openPopup();
+                }
+            }
+        });
+
+        loadLocations();
+    </script>
+</body>
+
+</html>
