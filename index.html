@@ -284,7 +284,43 @@
         @media (max-width: 700px) {
             form {
                 grid-template-columns: 1fr;
-                gap: 18px 0;
+                gap: 8px 0;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .modal {
+                max-width: 98vw;
+                padding: 8px 2vw 8px 2vw;
+            }
+
+            h2 {
+                font-size: 1.05rem;
+            }
+
+            input,
+            select,
+            textarea {
+                font-size: 0.92rem;
+                padding: 5px 6px;
+            }
+
+            button[type="submit"] {
+                font-size: 0.92rem;
+                padding: 7px 0;
+            }
+
+            .file-upload-label {
+                font-size: 0.90rem;
+            }
+
+            .file-upload-hint {
+                font-size: 0.85rem;
+            }
+
+            .img-preview {
+                max-width: 60px;
+                max-height: 40px;
             }
         }
     </style>
